@@ -14,7 +14,7 @@ export const deepCopy = <T>(target: T): T => {
         });
         return cp.map((n: any) => deepCopy<any>(n)) as any;
     }
-    if (typeof target === 'object' && target !== {}) {
+    if (typeof target === 'object' && !_.isEmpty(target)) {
         const cp = {...(target as { [key: string]: any })} as { [key: string]: any };
         Object.keys(cp).forEach(k => {
             cp[k] = deepCopy<any>(cp[k]);
@@ -24,33 +24,33 @@ export const deepCopy = <T>(target: T): T => {
     return target;
 };
 
-export enum DiffType {
+export enum ChangeType {
     PUT = 'put',
     DEL = 'del'
 }
 
-export interface DiffObj {
-    type: DiffType
+export interface ChangeSet {
+    type: ChangeType
     key: string[];
     value?: any;
 }
 
-const diff = (old: any, new_: any): DiffObj[] => {
+const diff = (old: any, new_: any): ChangeSet[] => {
     const changes = compare(old, new_, [], []);
     return changes;
 }
 
 
-function delCheck(op: DiffObj) {
-    if (op.type === DiffType.PUT && op.value === undefined) {
-        op.type = DiffType.DEL;
+function delCheck(op: ChangeSet) {
+    if (op.type === ChangeType.PUT && op.value === undefined) {
+        op.type = ChangeType.DEL;
         delete op.value;
     }
     return op;
 }
 
-const compare = (old: any, new_: any, path: string[], cache: string[]): DiffObj[] => {
-    const changes: DiffObj[] = [];
+const compare = (old: any, new_: any, path: string[], cache: string[]): ChangeSet[] => {
+    const changes: ChangeSet[] = [];
     if (old !== null && new_ !== null && typeof old === 'object' && typeof new_ === 'object' && !_.contains(cache, old)) {
         cache.push(old);
         const oldKeys = Object.keys(old);
@@ -64,7 +64,7 @@ const compare = (old: any, new_: any, path: string[], cache: string[]): DiffObj[
 
         const deletions = _.difference(oldKeys, newKeys).reverse().map(k => {
             return {
-                type: DiffType.DEL,
+                type: ChangeType.DEL,
                 key: path.concat(k),
             }
         });
@@ -72,7 +72,7 @@ const compare = (old: any, new_: any, path: string[], cache: string[]): DiffObj[
 
         const additions = _.difference(newKeys, oldKeys).map(k => {
             return delCheck({
-                type: DiffType.PUT,
+                type: ChangeType.PUT,
                 key: path.concat(k),
                 value: new_[k]
             });
@@ -80,14 +80,14 @@ const compare = (old: any, new_: any, path: string[], cache: string[]): DiffObj[
 
         changes.push(...additions);
     } else if (old !== new_) {
-        changes.push(delCheck({type: DiffType.PUT, key: path, value: new_}));
+        changes.push(delCheck({type: ChangeType.PUT, key: path, value: new_}));
     }
 
     return changes;
 }
 
 
-const apply = (changes: DiffObj[], target: any, modify: boolean = false) => {
+const apply = (changes: ChangeSet[], target: any, modify: boolean = false) => {
     let appliedObj: any, keys: string[];
     if(modify) {
         appliedObj = target;
@@ -96,10 +96,10 @@ const apply = (changes: DiffObj[], target: any, modify: boolean = false) => {
     }
 
     changes.forEach((change) => {
-        let ptr;
+        let ptr: any;
 
         switch (change.type) {
-            case DiffType.PUT:
+            case ChangeType.PUT:
                 ptr = appliedObj;
                 keys = change.key;
                 if(keys.length) {
@@ -118,7 +118,7 @@ const apply = (changes: DiffObj[], target: any, modify: boolean = false) => {
                     appliedObj = change.value;
                 }
                 break;
-            case DiffType.DEL:
+            case ChangeType.DEL:
                 ptr = appliedObj;
                 keys = change.key;
                 if(keys.length) {
