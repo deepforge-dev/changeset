@@ -90,9 +90,9 @@ const compare = (old: any, new_: any, path: string[], cache: string[]): DiffObj[
 const apply = (changes: DiffObj[], target: any, modify: boolean = false) => {
     let appliedObj: any, keys: string[];
     if(modify) {
-        appliedObj = deepCopy(target);
-    } else {
         appliedObj = target;
+    } else {
+        appliedObj = deepCopy(target);
     }
 
     changes.forEach((change) => {
@@ -104,7 +104,7 @@ const apply = (changes: DiffObj[], target: any, modify: boolean = false) => {
                 keys = change.key;
                 if(keys.length) {
                     keys.forEach((key, index, records) => {
-                        if(!key in ptr) {
+                        if(!(key in ptr)) {
                             ptr[key] = {};
                         }
 
@@ -123,7 +123,7 @@ const apply = (changes: DiffObj[], target: any, modify: boolean = false) => {
                 keys = change.key;
                 if(keys.length) {
                     keys.forEach((key, index, records) => {
-                        if(!key in ptr) {
+                        if(!(key in ptr)) {
                             ptr[key] = {};
                         }
 

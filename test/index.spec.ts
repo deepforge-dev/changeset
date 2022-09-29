@@ -4,8 +4,7 @@ const {default: diff, deepCopy, DiffType} = require('../index');
 
 describe('changeset', function () {
 
-  it('should be able to diff two objects and return a changeset',
-    function (done) {
+  it('should be able to diff two objects and return a changeset', function (done) {
       let a = {
         name: 'Eugene',
         number: 42,
@@ -29,20 +28,16 @@ describe('changeset', function () {
         age: 37
       };
 
-      var changes = diff(a, b);
-
+      const changes = diff(a, b);
       expect(changes).to.deep.equal([
-        { type: DiffType.PUT, key: ['self'], value: b },
+        { type: DiffType.PUT, key: ['name'], value: 'Susan' },
+        { type: DiffType.PUT, key: ['number'], value: 43 },
+        { type: DiffType.PUT, key: ['tags', '1'], value: 'tag4' },
+        { type: DiffType.DEL, key: ['tags', '2'] },
         { type: DiffType.PUT, key: [ 'scores', 'someArray', '1' ], value: 'three' },
         { type: DiffType.DEL, key: [ 'scores', 'someArray', '2' ] },
         { type: DiffType.DEL, key: ['scores', 'tetris'] },
         { type: DiffType.PUT, key: ['scores', 'zelda'], value: 3000 },
-        { type: DiffType.PUT, key: ['tags', '1'], value: 'tag4' },
-        { type: DiffType.DEL, key: ['tags', '2'] },
-        { type: DiffType.PUT, key: ['number'], value: 43 },
-        { type: DiffType.PUT, key: ['name'], value: 'Susan' },
-        { type: DiffType.DEL, key: ['scoresAgain'], },
-        { type: DiffType.PUT, key: ['friend'], value: a },
         { type: DiffType.PUT, key: ['age'], value: 37 },
       ]);
 
