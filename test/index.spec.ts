@@ -1,14 +1,12 @@
-var expect = require('chai').expect
-  , diff = require('..');
+const expect = require('chai').expect;
+const {default: diff, deepCopy, DiffType} = require('../index');
+
 
 describe('changeset', function () {
-  beforeEach(function (done) {
-    done();
-  });
 
   it('should be able to diff two objects and return a changeset',
     function (done) {
-      var a = {
+      let a = {
         name: 'Eugene',
         number: 42,
         tags: ['tag1', 'tag2', 'tag3'],
@@ -18,9 +16,6 @@ describe('changeset', function () {
           someArray: ['one', 'two', 'three']
         }
       };
-
-      a.self = a;
-      a.scoresAgain = a.scores;
 
       var b = {
         name: 'Susan',
@@ -34,24 +29,21 @@ describe('changeset', function () {
         age: 37
       };
 
-      b.friend = a;
-      b.self = b;
-
       var changes = diff(a, b);
 
       expect(changes).to.deep.equal([
-        { type: 'put', key: ['self'], value: b },
-        { type: 'put', key: [ 'scores', 'someArray', '1' ], value: 'three' },
-        { type: 'del', key: [ 'scores', 'someArray', '2' ] },
-        { type: 'del', key: ['scores', 'tetris'] },
-        { type: 'put', key: ['scores', 'zelda'], value: 3000 },
-        { type: 'put', key: ['tags', '1'], value: 'tag4' },
-        { type: 'del', key: ['tags', '2'] },
-        { type: 'put', key: ['number'], value: 43 },
-        { type: 'put', key: ['name'], value: 'Susan' },
-        { type: 'del', key: ['scoresAgain'], },
-        { type: 'put', key: ['friend'], value: a },
-        { type: 'put', key: ['age'], value: 37 },
+        { type: DiffType.PUT, key: ['self'], value: b },
+        { type: DiffType.PUT, key: [ 'scores', 'someArray', '1' ], value: 'three' },
+        { type: DiffType.DEL, key: [ 'scores', 'someArray', '2' ] },
+        { type: DiffType.DEL, key: ['scores', 'tetris'] },
+        { type: DiffType.PUT, key: ['scores', 'zelda'], value: 3000 },
+        { type: DiffType.PUT, key: ['tags', '1'], value: 'tag4' },
+        { type: DiffType.DEL, key: ['tags', '2'] },
+        { type: DiffType.PUT, key: ['number'], value: 43 },
+        { type: DiffType.PUT, key: ['name'], value: 'Susan' },
+        { type: DiffType.DEL, key: ['scoresAgain'], },
+        { type: DiffType.PUT, key: ['friend'], value: a },
+        { type: DiffType.PUT, key: ['age'], value: 37 },
       ]);
 
       done();
@@ -63,7 +55,7 @@ describe('changeset', function () {
 
     var changes = diff(a, b);
     expect(changes).to.deep.equal([
-      { type: 'put', key: [], value: 'Susan' }
+      { type: DiffType.PUT, key: [], value: 'Susan' }
     ]);
 
     done();
@@ -74,12 +66,12 @@ describe('changeset', function () {
 
     changes = diff(null, 'Susan');
     expect(changes).to.deep.equal([
-      { type: 'put', key: [], value: 'Susan' }
+      { type: DiffType.PUT, key: [], value: 'Susan' }
     ]);
 
     changes = diff('Eugene', null);
     expect(changes).to.deep.equal([
-      { type: 'put', key: [], value: null }
+      { type: DiffType.PUT, key: [], value: null }
     ]);
 
     done();
@@ -90,12 +82,12 @@ describe('changeset', function () {
 
     changes = diff(undefined, 'Susan');
     expect(changes).to.deep.equal([
-      { type: 'put', key: [], value: 'Susan' }
+      { type: DiffType.PUT, key: [], value: 'Susan' }
     ]);
 
     changes = diff('Eugene', undefined);
     expect(changes).to.deep.equal([
-      { type: 'del', key: [] }
+      { type: DiffType.DEL, key: [] }
     ]);
 
     done();
@@ -113,8 +105,6 @@ describe('changeset', function () {
       }
     };
 
-    a.self = a;
-    a.scoresAgain = a.scores;
 
     var b = {
       name: 'Susan',
@@ -128,11 +118,8 @@ describe('changeset', function () {
       age: 37
     };
 
-    b.friend = a;
-    b.self = b;
 
-    var clone = require("udc");
-    var bClone = clone(b);
+    var bClone = deepCopy(b);
 
     var changes = diff(a, b);
     var b_ = diff.apply(changes, a);
@@ -208,9 +195,6 @@ describe('changeset', function () {
           age: 37
         };
 
-        b.friend = a;
-        b.self = b;
-
         var changes = diff(a, b);
         var b_ = diff.apply(changes, a, true);
         expect(b_.scores.someArray.length).to.equal(b.scores.someArray.length);
@@ -222,7 +206,7 @@ describe('changeset', function () {
   it('should be able to self-modify and replace an entire object',
     function(done) {
       var data = { name: 'Eugene', number: 43 };
-      var change = [ { type: 'put', key: [], value: 'xxx' } ];
+      var change = [ { type: DiffType.PUT, key: [], value: 'xxx' } ];
       var obj = diff.apply(change, data, true);
       expect(obj).to.equal('xxx');
       done();
@@ -231,11 +215,11 @@ describe('changeset', function () {
   it('should be able to deal with incrementally built arrays', function(done) {
     var obj = [];
     var changeset = [
-      { type: 'put', key: [], value: [] },
-      { type: 'put', key: [ 0, 'make' ], value: 'Toyota' },
-      { type: 'put', key: [ 0, 'model' ], value: 'Camry' },
-      { type: 'put', key: [ 1, 'make' ], value: 'Toyota' },
-      { type: 'put', key: [ 1, 'model' ], value: 'Corolla' } ];
+      { type: DiffType.PUT, key: [], value: [] },
+      { type: DiffType.PUT, key: [ 0, 'make' ], value: 'Toyota' },
+      { type: DiffType.PUT, key: [ 0, 'model' ], value: 'Camry' },
+      { type: DiffType.PUT, key: [ 1, 'make' ], value: 'Toyota' },
+      { type: DiffType.PUT, key: [ 1, 'model' ], value: 'Corolla' } ];
     obj = diff.apply(changeset, obj, true);
     expect(obj).to.deep.equals([
       { make: 'Toyota', model: 'Camry' },
@@ -257,7 +241,7 @@ describe('changeset', function () {
     const b = ['f', 'g'];
     const changes = diff(a, b);
     const delKeys = changes
-        .filter(change => change.type === 'del')
+        .filter(change => change.type === DiffType.DEL)
         .map(change => change.key[0]);
 
     delKeys.reduce((prev, next) => {
