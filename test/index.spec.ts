@@ -246,4 +246,62 @@ describe('changeset', function () {
         });
     });
 
+    describe('deepCopy', function () {
+        it('should deepcopy null/undefined', () => {
+            const obj = null;
+            const clone = deepCopy(obj);
+
+            expect(clone).to.equal(null);
+            const obj2 = undefined;
+            const clone2 = deepCopy(obj2);
+
+            expect(clone2).to.equal(undefined);
+        });
+
+        it('should deepcopy and not propagate changes from the original object', () => {
+            const obj = {
+                a: 'Eugene',
+                b: {}
+            }
+
+            const clone = deepCopy(obj);
+            expect(clone).to.deep.equals(obj);
+            obj.b = {
+                c: 'ChangeSets'
+            };
+            expect(clone.b).to.be.empty;
+        });
+
+         it('should deepcopy and complex object with dates/arrays', () => {
+            const obj = {
+                a: 'Eugene',
+                b: {},
+                c: {
+                    d: {
+                        e: {
+                            f: [1, 2, 4],
+                            g: {
+                                c: {
+                                    a: 'Eugene',
+                                    created: new Date(),
+                                    f: {
+                                        g: {
+                                            h: {
+                                                i: 'value'
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            const clone = deepCopy(obj);
+            expect(clone).to.deep.equals(obj);
+        });
+
+    })
+
 });
