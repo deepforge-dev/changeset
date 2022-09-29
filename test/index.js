@@ -38,20 +38,19 @@ describe('changeset', function () {
       b.self = b;
 
       var changes = diff(a, b);
-
       expect(changes).to.deep.equal([
-        { type: 'put', key: ['self'], value: b },
+        { type: 'put', key: ['name'], value: 'Susan' },
+        { type: 'put', key: ['number'], value: 43 },
+        { type: 'put', key: ['tags', '1'], value: 'tag4' },
+        { type: 'del', key: ['tags', '2'] },
         { type: 'put', key: [ 'scores', 'someArray', '1' ], value: 'three' },
         { type: 'del', key: [ 'scores', 'someArray', '2' ] },
         { type: 'del', key: ['scores', 'tetris'] },
         { type: 'put', key: ['scores', 'zelda'], value: 3000 },
-        { type: 'put', key: ['tags', '1'], value: 'tag4' },
-        { type: 'del', key: ['tags', '2'] },
-        { type: 'put', key: ['number'], value: 43 },
-        { type: 'put', key: ['name'], value: 'Susan' },
+        { type: 'put', key: ['self'], value: b },
         { type: 'del', key: ['scoresAgain'], },
-        { type: 'put', key: ['friend'], value: a },
         { type: 'put', key: ['age'], value: 37 },
+        { type: 'put', key: ['friend'], value: a },
       ]);
 
       done();
