@@ -4,7 +4,8 @@
   "description": "Library to diff JSON objects into atomic put and delete operations, and apply change sets to objects. Useful with Levelup/LevelDB object synchronization.",
   "main": "index.js",
   "scripts": {
-    "test": "node_modules/.bin/mocha"
+    "build": "tsc",
+    "test": "node_modules/.bin/ts-mocha -p tsconfig.json test/index.spec.ts"
   },
   "repository": {
     "type": "git",
@@ -22,11 +23,15 @@
   "author": "Eugene Ware <eugene@noblesamurai.com>",
   "license": "BSD-3-Clause",
   "devDependencies": {
+    "@types/mocha": "^10.0.0",
+    "@types/node": "^18.7.23",
+    "@types/underscore": "^1.11.4",
     "chai": "3.5.0",
-    "mocha": "^5.2.0"
+    "mocha": "^5.2.0",
+    "ts-mocha": "^10.0.0",
+    "typescript": "^4.8.4"
   },
   "dependencies": {
-    "udc": "^1.0.0",
     "underscore": "^1.8.3"
   }
 }
